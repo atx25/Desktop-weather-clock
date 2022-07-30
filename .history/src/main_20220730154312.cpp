@@ -12,9 +12,7 @@
 TFT_eSPI tft = TFT_eSPI();
 TFT_eSprite clk = TFT_eSprite(&tft);
 
-#include <ArduinoJson.h>
 //创建一个网络对象
-WiFiClientSecure client;
 HTTPClient https;
 //连接天气服务器
 void getweather();
@@ -40,7 +38,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  getweather();
+  
 }
 
 void wificonnect(){
@@ -81,34 +79,7 @@ void wificonnect(){
   clk.deleteSprite();
   clk.unloadFont();
 }
-//解析天气程序
-void putweather(const char* input){
-  const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 200;
-  DynamicJsonBuffer jsonBuffer(capacity);
-
-  JsonObject& root = jsonBuffer.parseObject(input);
-
-  const char* status = root["status"]; // "1"
-  const char* count = root["count"]; // "1"
-  const char* info = root["info"]; // "OK"
-  const char* infocode = root["infocode"]; // "10000"
-
-  JsonObject& lives_0 = root["lives"][0];
-  const char* lives_0_province = lives_0["province"]; // "河南"
-  const char* lives_0_city = lives_0["city"]; // "太康县"
-  const char* lives_0_adcode = lives_0["adcode"]; // "411627"
-  const char* lives_0_weather = lives_0["weather"]; // "阴"
-  const char* lives_0_temperature = lives_0["temperature"]; // "32"
-  const char* lives_0_winddirection = lives_0["winddirection"]; // "无风向"
-  const char* lives_0_windpower = lives_0["windpower"]; // "≤3"
-  const char* lives_0_humidity = lives_0["humidity"]; // "63"
-  const char* lives_0_reporttime = lives_0["reporttime"]; // "2022-07-30 15:30:12"
-  Serial.println();
-  Serial.println(lives_0_province);
-}
 void getweather(){
-  client.setInsecure();//连接服务器不验证身份
-  client.setTimeout(5000);//设置服务器连接超时
   Serial.println("[HTTPS] begin...");
   String url = "https://restapi.amap.com/v3/weather/weatherInfo?&city="
                 + location + "&key=" + key + "&extensions=" + extensions;
@@ -120,7 +91,7 @@ void getweather(){
       if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) { // 服务器响应
         String str = https.getString();
         Serial.printf(str.c_str());
-        putweather(str.c_str());
+        // putjson(str.c_str());
       }
     } else { // 错误返回负值
       Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
